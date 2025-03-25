@@ -1,73 +1,122 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Shop API Documentation
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This document provides an overview of the Shop API, which is built using the following technologies: Nest.js, Kafka, PostgreSQL, Prisma, Elasticsearch, Swagger, Docker, and Redis.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+- [Introduction](#introduction)
+- [Endpoints](#endpoints)
+- [Authentication](#authentication)
+- [Data Models](#data-models)
+- [Database](#database)
+- [Search](#search)
+- [Messaging](#messaging)
+- [API Documentation](#api-documentation)
+- [Containerization](#containerization)
+- [Caching](#caching)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Introduction
 
-## Installation
+The Shop API is a RESTful API designed to handle various operations related to an e-commerce shop. It provides endpoints for managing products, orders, customers, and more.
 
-```bash
-$ npm install
-```
+## Endpoints
 
-## Running the app
+The following table lists the available endpoints of the Shop API:
 
-```bash
-# development
-$ npm run start
+| Endpoint                     | Description                                     |
+| ---------------------------- | ----------------------------------------------- |
+| `/api/products`              | CRUD operations for managing products           |
+| `/api/categories`            | CRUD operations for managing categories         |
+| `/api/customers`             | CRUD operations for managing customers          |
+| `/api/register`              | User registration endpoint                      |
+| `/api/login`                 | User login endpoint                             |
+| `/api/logout`                | User logout endpoint                            |
+| `/api/health`                | Health check endpoint                           |
+| `/api/search`                | Elastic endpoint                                |
+| `/api`                       | Swagger docs endpoint                           |
+| `/payment`                   | Payment endpoint                                |
 
-# watch mode
-$ npm run start:dev
+## Authentication
 
-# production mode
-$ npm run start:prod
-```
+The Shop API uses JWT (JSON Web Tokens) for authentication. The following endpoints require authentication:
 
-## Test
+- `/api/cart` (create, update, delete operations)
+- `/api/health` (check db availability)
+- `/payment` (create payment using stripe)
 
-```bash
-# unit tests
-$ npm run test
+To perform authenticated requests, include the JWT token in the `Authorization` header as follows: `Authorization: Bearer <token>`
 
-# e2e tests
-$ npm run test:e2e
+## Data Models
 
-# test coverage
-$ npm run test:cov
-```
+The Shop API uses the following data models:
 
-## Support
+### Product
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- `id` (number)
+- `title` (string)
+- `price` (string)
+- `description` (string)
+- `categories` ([categories])
+- `image` (string)
 
-## Stay in touch
+### Category
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- `id` (number)
+- `categoryName` (string)
 
-## License
+### Cart
 
-Nest is [MIT licensed](LICENSE).
+- `id` (uuid)
+- `userId` (string)
+- `date` (DateTime)
+
+### User
+
+- `id` (uuid)
+- `email` (string)
+- `password` (string)
+- `hashedRt` (string)
+- `role` (Role)
+- `address` (address)
+
+### Address
+
+- `id` (uuid)
+- `userId` (string)
+- `address_line1` (string)
+- `address_line2` (string)
+- `city` (string)
+- `region` (string)
+- `postal_code` (string)
+- `country` (string)
+
+### Role
+- `USER`
+- `SELLER`
+- `ADMIN`
+
+## Database
+
+The Shop API uses PostgreSQL as the underlying database. Prisma is used as the ORM (Object-Relational Mapping) tool to interact with the database. Prisma provides a type-safe API for querying and manipulating data.
+
+## Search
+
+Elasticsearch is used for implementing search functionality in the Shop API. It enables fast and efficient full-text search capabilities for products.
+
+## Messaging
+
+RabbitMQ is used as a message broker for handling asynchronous events and communication between different components of the Shop API. It provides reliable and scalable messaging.
+
+## API Documentation
+
+The Shop API is documented using Swagger. Swagger provides a user-friendly interface to explore and test the API endpoints. You can access the API documentation by visiting the `/api` endpoint.
+
+## Containerization
+
+The Shop API is containerized using Docker compose. Docker allows for easy deployment and scalability of the application by packaging it into lightweight, portable containers.
+
+## Caching
+
+Redis is used as a caching layer in the Shop API. It helps improve the performance of frequently accessed data by storing it in memory.
+
+---
